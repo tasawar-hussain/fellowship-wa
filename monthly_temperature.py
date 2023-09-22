@@ -1,28 +1,19 @@
-class CheckMonthlyTemperature:
-    def __init__(self, csv_read_array=[]):
-        self.csv_read_array = csv_read_array
-        self.months_data = [
-            "Jan",
-            "Feb",
-            "Mar",
-            "Apr",
-            "May",
-            "Jun",
-            "Jul",
-            "Aug",
-            "Sep",
-            "Oct",
-            "Nov",
-            "Dec",
-        ]
+from utils import MONTHS
 
-    def MonthTemperature(self, index):
+
+class MonthlyWeatherAnalyzer:
+    def __init__(self, weather_data_list = []):
+        self.weather_data_list = weather_data_list
+        self.months_data = MONTHS
+
+    def calculate_average_value(self, position):
         total_entries = 0
         sum_of_entries = 0
+        data_list = self.weather_data_list
 
-        for i in range(len(self.csv_read_array)):
-            if self.csv_read_array[i][index] != "":
-                value = self.ConvertStringValues(i, index)
+        for i in range(len(data_list)):
+            if data_list[i][position] != "":
+                value = self.data_array_convert_string_values_to_integer(i, position)
                 sum_of_entries += value
 
             total_entries += 1
@@ -31,16 +22,18 @@ class CheckMonthlyTemperature:
 
         return average_value
 
-    def CheckMonth(self, month):
+    def get_month_value(self, month):
         month = int(month)
         if month in range(1, 13):
-            for i in range(len(self.months_data)):
-                if i == month - 1:
-                    return self.months_data[i]
+            return self.months_data[month]
         else:
             print("Invalid month number")
 
-    def ConvertStringValues(self, index, value_index):
-        int_value = int(self.csv_read_array[index][value_index])
+    def data_array_convert_string_values_to_integer(self, index, value_index):
+        try:
+            int_value = int(self.weather_data_list[index][value_index])
 
-        return int_value
+            return int_value
+        except IndexError:
+            print("Index out of bound")
+            return

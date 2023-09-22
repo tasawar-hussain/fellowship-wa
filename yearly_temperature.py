@@ -1,79 +1,54 @@
 from datetime import datetime
+from utils import YEAR_END_RESULTS
 
 
-class YearlyTemperature:
-    def __init__(self, csv_read_array):
-        self.csv_read_array = csv_read_array
-        self.year_temp_results = {
-            "max_temp": 0,
-            "pkt_max_temp": "",
-            "min_temp": 0,
-            "pkt_min_temp": "",
-            "max_humidity": 0,
-            "min_humidity": 0,
-            "mean_humidity": 0,
-            "pkt_humidity": "",
-        }
+class YearWeatherAnalyzer:
+    def __init__(self, weather_data_list):
+        self.weather_data_list = weather_data_list
+        self.year_temp_results = YEAR_END_RESULTS
 
-    def YearTemperature(
-        self,
-        max_temp_index,
-        min_temp_index,
-        max_humidity_index,
-        date_index,
-        mean_hum_ind,
-        min_hum_ind,
-    ):
-        self.year_temp_results["min_temp"] = self.ConvertStringValues(0, min_temp_index)
-
-        for index in range(len(self.csv_read_array)):
-            max_val = self.ConvertStringValues(index, max_temp_index)
-            min_val = self.ConvertStringValues(index, min_temp_index)
-            max_humd = self.ConvertStringValues(index, max_humidity_index)
-            mean_humd = self.ConvertStringValues(index, mean_hum_ind)
-            min_hum = self.ConvertStringValues(index, min_hum_ind)
+    def year_analyzer( self, max_temp_index, min_temp_index, max_humid_idx, date_index, mean_humid_idx):
+        for index in range(len(self.weather_data_list)):
+            max_val = self.convert_data_array_values_to_integer(index, max_temp_index)
+            min_val = self.convert_data_array_values_to_integer(index, min_temp_index)
+            mean_humid = self.convert_data_array_values_to_integer(index, mean_humid_idx)
+            max_humid = self.convert_data_array_values_to_integer(index, max_humid_idx)
 
             if max_val != "":
-                self.CalculateHighestTemp(max_val, index, date_index)
+                self.calculate_highest_temp(max_val, index, date_index)
             if min_val != "":
-                self.CalculateLowestTemp(min_val, index, date_index)
-
-            if max_val != "" and mean_humd != "" and min_hum != "":
-                self.CalculateMaximumHumidty(
-                    max_humd, index, date_index, mean_humd, min_hum
-                )
+                self.calculate_lowest_temp(min_val, index, date_index)
+            if max_val != "" and mean_humid != "" :
+                self.calculate_humidity(index, date_index, mean_humid, max_humid)
 
         return self.year_temp_results
 
-    def CalculateHighestTemp(self, max_val, index, date_index):
-        if max_val >= int(self.year_temp_results["max_temp"]):
+    def calculate_highest_temp(self, max_val, index, date_index):
+        if max_val >= self.year_temp_results["max_temp"]:
             self.year_temp_results["max_temp"] = max_val
-            self.year_temp_results["pkt_max_temp"] = self.GetPktDate(index, date_index)
+            self.year_temp_results["pkt_max_temp"] = self.get_pkt_value(index, date_index)
 
-    def CalculateMaximumHumidty(
-        self, max_humidity, index, date_index, mean_hum, min_hum
+    def calculate_humidity(
+        self, index, date_index, mean_humidity,max_humidity
     ):
-        if max_humidity >= self.year_temp_results["max_humidity"]:
+        if mean_humidity >= self.year_temp_results["mean_humidity"]:
             self.year_temp_results["max_humidity"] = max_humidity
-            self.year_temp_results["min_humidity"] = mean_hum
-            self.year_temp_results["mean_humidity"] = min_hum
-            self.year_temp_results["pkt_humidity"] = self.GetPktDate(index, date_index)
+            self.year_temp_results["mean_humidity"] = mean_humidity
+            self.year_temp_results["pkt_humidity"] = self.get_pkt_value(index, date_index)
 
-    def CalculateLowestTemp(self, min_val, index, date_index):
+    def calculate_lowest_temp(self, min_val, index, date_index):
         if min_val < self.year_temp_results["min_temp"]:
             self.year_temp_results["min_temp"] = min_val
-            self.year_temp_results["pkt_min_temp"] = self.GetPktDate(index, date_index)
+            self.year_temp_results["pkt_min_temp"] = self.get_pkt_value(index, date_index)
 
-    def ConvertStringValues(self, index, value_index):
-        int_value = self.csv_read_array[index][value_index]
-
+    def convert_data_array_values_to_integer(self, index, value_index):
+        int_value = self.weather_data_list[index][value_index]
         if int_value != "":
             int_value = int(int_value)
-
         return int_value
 
-    def GetPktDate(self, index, date_index):
-        value = self.csv_read_array[index][date_index]
+    def get_pkt_value(self, index, date_index):
+        value = self.weather_data_list[index][date_index]
         value = value.split("-")
         year = int(value[0])
         month = int(value[1])

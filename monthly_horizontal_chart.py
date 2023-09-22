@@ -1,47 +1,61 @@
-from monthly_temperature import CheckMonthlyTemperature
+from utils  import RED_COLOR, BLUE_COLOR, BLACK_COLOR
 
+class MonthlyWeatherVisualizer:
+    def __init__(self, weather_data):
+        self.weather_data = weather_data
+        self.visualizer_data_result = []
 
-class MonthlyChart:
-    def __init__(self, csv_array):
-        self.csv_array = csv_array
+    def get_results(self, max_idx, min_idx, isSingleLine=False):
+        result = ""
+        self.visualizer_data_result=[]
 
-    def GetResults(self, max_ind, min_ind, isSingleLine=False):
-        for index in range(len(self.csv_array)):
-            max_val = self.csv_array[index][max_ind]
-            min_val = self.csv_array[index][min_ind]
+        for index in range(len(self.weather_data)):
+            max_val = self.get_value_from_weather_data(index,max_idx)
+            min_val = self.get_value_from_weather_data(index,min_idx)
 
             if isSingleLine:
-                self.DisplayResultsInSingleLine(index, max_val, min_val)
+                result = self.return_results_in_single_line(index, max_val, min_val)
             else:
-                self.DisplayResults(index, max_val, min_val)
+                result = self.return_results(index, max_val, min_val)
+        print(result)
+    
+    def get_value_from_weather_data(self, position, index_in_data):
+        return self.weather_data[position][index_in_data]
 
-    def DisplayResults(self, index, max_val, min_val):
-        if max_val != "":
-            highest_temp = f"{index+1}" + " "
-            for i in range(int(max_val)):
-                highest_temp += "\033[31m" + "+" + "\033[0m"
-
-        if min_val != "":
-            lowest_temp = f"{index+1}" + " "
-            for i in range(int(min_val)):
-                lowest_temp += "\033[34m" + "+" + "\033[0m"
-
-        highest_temp += " " + max_val + "C"
-        lowest_temp += " " + min_val + "C"
-
-        print(lowest_temp)
-        print(highest_temp)
-
-    def DisplayResultsInSingleLine(self, index, max_val, min_val):
-        data_result = f"{index+1}" + " "
-        if min_val != "":
-            for i in range(int(min_val)):
-                data_result += "\033[34m" + "+" + "\033[0m"
+    def return_results(self, position, max_val, min_val):
+        data_result = self.visualizer_data_result
 
         if max_val != "":
-            for i in range(int(max_val)):
-                data_result += "\033[31m" + "+" + "\033[0m"
+            data_result.append(f"{position + 1} ")
+            self.add_sign_for_max_val(max_val, data_result)
+            data_result.append(f" {max_val}C \n")
 
-        data_result += " " + min_val + "C - " + max_val + "C"
+        if min_val != "":
+            data_result.append(f"{position + 1} ")
+            self.add_sign_for_min_val(min_val, data_result)
+            data_result.append(f" {min_val}C \n")
 
-        print(data_result)
+        return "".join(data_result)
+        
+
+    def return_results_in_single_line(self, position, max_val, min_val):
+        data_result = self.visualizer_data_result
+        data_result.append(f"\n{position + 1} ")
+
+        if min_val != "":
+            self.add_sign_for_min_val(min_val, data_result)
+
+        if max_val != "":
+            self.add_sign_for_max_val(max_val, data_result)
+
+        data_result.append(" " + min_val + "C - " + max_val + "C")
+        return "".join(data_result)
+
+    def add_sign_for_min_val(self, value, data_result):
+        for i in range(int(value)):
+            data_result.append(f"{BLUE_COLOR}+{BLACK_COLOR}")
+
+    def add_sign_for_max_val(self, value, data_result):
+        for i in range(int(value)):
+            data_result.append(f"{RED_COLOR}+{BLACK_COLOR}")
+            
