@@ -1,7 +1,8 @@
 import csv
+from constants import WEATHER_FILE_HEADERS
 
 
-class DataAnalyzer:
+class DataReader:
     def __init__(self):
         self.data_list = []
         self.column = []
@@ -12,11 +13,11 @@ class DataAnalyzer:
                 file_path,
                 "r",
             ) as file:
-                csv_files = csv.reader(file, delimiter = ",")
+                csv_files = csv.reader(file, delimiter=",")
                 for row in csv_files:
                     if row == [] or len(row) == 1:
                         continue
-                    elif any(map(lambda string: string in row[0], ('PKT', 'PKST'))):
+                    elif any(map(lambda string: string in row[0], (WEATHER_FILE_HEADERS["Date"], WEATHER_FILE_HEADERS["Date_S"]))):
                         self.column.append(row)
                     else:
                         self.data_list.append(row)
@@ -30,18 +31,22 @@ class DataAnalyzer:
             print("Error occured while reading file")
             return
 
-    def find_index_of_columns(self, value):
+    def find_index_of_header_name(self, value):
         try:
             column = self.column[0]
 
-            if value == "PKT" or value == "PKST":
-                col_idx = column.index("PKT") if column.__contains__("PKT") else column.index("PKST")
+            if value == (WEATHER_FILE_HEADERS["Date"] or WEATHER_FILE_HEADERS["Date_S"]):
+                col_idx = self.get_date_index(column)
             else:
                 col_idx = column.index(value)
-                     # max_temp_index, min_temp_index, mean_humidity_index, max_humidity_index, date
             return col_idx
         except:
             print("Header not found")
             return
 
-        
+    @classmethod
+    def get_date_index(cls, column):
+        if WEATHER_FILE_HEADERS['Date'] in column:
+            return column.index(WEATHER_FILE_HEADERS["Date"])
+        else:
+            return column.index(WEATHER_FILE_HEADERS["Date_S"])
